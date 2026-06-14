@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Invitation</title>
+    <!-- Google Fonts: 華やかで上品な明朝体と洗練されたゴシック体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Noto+Serif+JP:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 基本設定 & カラーパレット --- */
+        :root {
+            --bg-color: #fdfbf7;       /* 明るく温かみのあるアイボリー */
+            --primary-gold: #c5a059;   /* 上品で落ち着いたゴールド */
+            --text-dark: #4a4a4a;      /* 柔らかなチャコールグレー */
+            --text-light: #8c8c8c;     /* 補助的な薄いグレー */
+            --card-bg: #ffffff;        /* 各セクションの白背景 */
+            --accent-soft: #f7f3eb;    /* 薄いベージュのアクセント */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.8;
+            letter-spacing: 0.05em;
+            overflow-x: hidden;
+        }
+
+        /* --- 1. 手紙の開封アニメーション演出 --- */
+        #envelope-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f4f0e6;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        #envelope-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 320px;
+            height: 220px;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .envelope {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #e6dfd3;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        /* 封筒のフタ（上三角形） */
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-top: 120px solid #dcd3c1;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            transform-origin: top;
+            transition: transform 0.6s ease;
+            z-index: 3;
+        }
+
+        /* 封筒の前面ポケット部分の重なり表現 */
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-bottom: 120px solid #ede7dc;
+            border-left: 160px solid #e1d9ca;
+            border-right: 160px solid #e1d9ca;
+            border-radius: 0 0 8px 8px;
+            z-index: 4;
+        }
+
+        /* 封筒の中の招待状カード */
+        .invitation-letter {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            width: 290px;
+            height: 180px;
+            background-color: #ffffff;
+            border-radius: 4px;
+            z-index: 2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.6s ease 0.4s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .invitation-letter h2 {
+            font-size: 16px;
+            color: var(--primary-gold);
+            letter-spacing: 0.2em;
+            margin-bottom: 5px;
+        }
+
+        .invitation-letter p {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* 開封アニメーション発火時のスタイル */
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+            border-top-color: #ede7dc;
+        }
+
+        .envelope-wrapper.open .invitation-letter {
+            transform: translateY(-130px);
+        }
+
+        .tap-hint {
+            margin-top: 40px;
+            font-size: 13px;
+            color: var(--primary-gold);
+            letter-spacing: 0.1em;
+            animation: pulse 1.8s infinite ease-in-out;
+            font-weight: 300;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.4; transform: scale(0.98); }
+        }
+
+        /* --- 2. メインレイアウト（スマホ最適化） --- */
+        .main-container {
+            max-width: 500px; /* スマホで見やすい横幅に固定 */
+            margin: 0 auto;
+            background-color: var(--bg-color);
+            padding-bottom: 60px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.02);
+            min-height: 100vh;
+        }
+
+        /* 各セクションの共通設定 */
+        section {
+            padding: 50px 25px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--primary-gold);
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+            letter-spacing: 0.15em;
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 30px;
+            height: 1px;
+            background-color: var(--primary-gold);
+            margin: 12px auto 0;
+        }
+
+        /* --- 3. メインビジュアル & メッセージ --- */
+        .hero-section {
+            padding: 40px 20px 20px 20px;
+        }
+
+        .main-family-photo {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+            margin-bottom: 35px;
+        }
+
+        .message-box {
+            background-color: var(--card-bg);
+            padding: 35px 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .message-box p {
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: justify;
+            text-justify: inter-ideograph;
+        }
+        
+        .message-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* --- 4. プロフィールセクション --- */
+        .profile-section {
+            background-color: var(--accent-soft);
+        }
+
+        .profile-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .profile-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .profile-role {
+            font-size: 12px;
+            color: var(--primary-gold);
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .profile-img-wrapper {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--bg-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .profile-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .profile-comment {
+            font-size: 13px;
+            color: var(--text-dark);
+            text-align: left;
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.7;
+        }
+
+        /* 子どもたちの2段並びレイアウト（スマホ対応） */
+        .children-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .child-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .child-card .profile-img-wrapper {
+            width: 90px;
+            height: 90px;
+        }
+
+        .child-card .profile-name {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .child-tag {
+            font-size: 11px;
+            color: var(--primary-gold);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .child-card .profile-comment {
+            font-size: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* --- 5. ギャラリースライドショー（5秒自動切り替え） --- */
+        .gallery-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        }
+
+        .slides-wrapper {
+            display: flex;
+            width: 500%; /* 5枚分 */
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .slide {
+            width: 20%;
+            height: 100%;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* インジケーターのドット */
+        .slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #e0dcd5;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dot.active {
+            background-color: var(--primary-gold);
+            width: 18px;
+            border-radius: 4px;
+        }
+
+        /* --- 6. スケジュール & 会場案内 --- */
+        .schedule-section {
+            background-color: var(--card-bg);
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 300px;
+            margin: 0 auto 40px;
+            padding-left: 30px;
+            text-align: left;
+        }
+
+        /* タイムラインの縦線 */
+        .timeline::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 7px;
+            width: 1px;
+            height: 90%;
+            background-color: var(--primary-gold);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        /* タイムラインの点 */
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            left: -26px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: var(--bg-color);
+            border: 2px solid var(--primary-gold);
+            box-sizing: border-box;
+        }
+
+        .time {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-gold);
+            display: block;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
+        .event {
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .location-box {
+            background-color: var(--bg-color);
+            padding: 25px 20px;
+            border-radius: 12px;
+            border: 1px dashed var(--primary-gold);
+        }
+
+        .location-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .location-address {
+            font-size: 13px;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        /* --- 7. 出欠確認（Googleフォーム連携） --- */
+        .rsvp-section {
+            background-color: var(--accent-soft);
+        }
+
+        .rsvp-card {
+            background-color: var(--card-bg);
+            padding: 35px 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .rsvp-card p {
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .parking-info {
+            font-size: 12px;
+            color: var(--primary-gold);
+            background-color: var(--bg-color);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 3px solid var(--primary-gold);
+            text-align: left;
+        }
+
+        .rsvp-button {
+            display: inline-block;
+            width: 100%;
+            max-width: 280px;
+            background-color: var(--primary-gold);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 16px 0;
+            border-radius: 30px;
+            letter-spacing: 0.1em;
+            box-shadow: 0 6px 20px rgba(197, 160, 89, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .rsvp-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 3px 10px rgba(197, 160, 89, 0.2);
+        }
+
+        .deadline-text {
+            display: block;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-light);
+            padding: 20px 0;
+            background-color: var(--bg-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 開封アニメーションエリア -->
+    <div id="envelope-overlay">
+        <div class="envelope-wrapper" onclick="openEnvelope()">
+            <div class="envelope-flap"></div>
+            <div class="invitation-letter">
+                <h2>WEDDING INVITATION</h2>
+                <p>Tap to Open</p>
+            </div>
+            <div class="envelope-pocket"></div>
+        </div>
+        <div class="tap-hint">招待状をタップして開いてください</div>
+    </div>
+
+    <!-- 2. メインウェブページコンテンツ -->
+    <div class="main-container">
+        
+        <!-- メインビジュアル & ご挨拶 -->
+        <section class="hero-section">
+            <!-- ※ご自身の家族写真（URLまたはローカルパス）に差し替えてください -->
+            <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=800" alt="家族写真" class="main-family-photo">
+            
+            <div class="message-box">
+                <span class="profile-role" style="display:block; margin-bottom:10px;">Greeting</span>
+                <p>謹啓　初夏の候　皆様におかれましては益々ご清栄のこととお慶び申し上げます。</p>
+                <p>この度　私たちは結婚式を執り行う運びとなりました。</p>
+                <p>日頃から温かく支えてくださる大切な皆様をお迎えし　家族4人で歩む新たな人生への誓いを立てたいと存じます。</p>
+                <p>ご多忙中 誠に恐縮ではございますが　ぜひ私たちの門出を見守っていただければ幸いです。</p>
+                <p style="text-align: right; margin-top: 25px; font-weight: 500;">謹白</p>
+            </div>
+        </section>
+
+        <!-- プロフィール紹介 -->
+        <section class="profile-section">
+            <h2 class="section-title">Family Profile</h2>
+            
+            <!-- 夫 -->
+            <div class="profile-card">
+                <div class="profile-role">Groom</div>
+                <div class="profile-img-wrapper">
+                    <!-- ※夫の顔写真に差し替え可能 -->
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" alt="夫の写真">
+                </div>
+                <div class="profile-name">田中 一成</div>
+                <div class="profile-comment">
+                    本日はお忙しい中お越しいただきありがとうございます。大好きな家族、そして大切な皆様と一緒に、笑顔あふれる楽しい時間を過ごせることを心から楽しみにしています！
+                </div>
+            </div>
+
+            <!-- 妻 -->
+            <div class="profile-card">
+                <div class="profile-role">Bride</div>
+                <div class="profile-img-wrapper">
+                    <!-- ※妻の顔写真に差し替え可能 -->
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400" alt="妻の写真">
+                </div>
+                <div class="profile-name">田中 美穂</div>
+                <div class="profile-comment">
+                    皆様との繋がりに感謝を込めて、ささやかなおもてなしの席をご用意しました。子どもたちと一緒に、賑やかで温かい式にしたいと思っています。
+                </div>
+            </div>
+
+            <!-- 子どもたち（2カラムレイアウト） -->
+            <div class="children-grid">
+                <!-- 子ども① -->
+                <div class="child-card">
+                    <div class="child-tag">長男 / 小学3年生</div>
+                    <div class="profile-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=400" alt="子ども1の写真">
+                    </div>
+                    <div class="profile-name">大翔 (ひろと)</div>
+                    <div class="profile-comment">結婚式ですごく大きいケーキを食べるのが楽しみです！リングボーイをがんばるよ！</div>
+                </div>
+
+                <!-- 子ども② -->
+                <div class="child-card">
+                    <div class="child-tag">長女 / 小学1年生</div>
+                    <div class="profile-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=400" alt="子ども2の写真">
+                    </div>
+                    <div class="profile-name">結菜 (ゆいな)</div>
+                    <div class="profile-comment">かわいいドレスを着て、お父さんお母さんにお花を渡すのがとってもたのしみです！</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ギャラリー（5枚スライドショー） -->
+        <section>
+            <h2 class="section-title">Gallery</h2>
+            <div class="gallery-container">
+                <div class="slides-wrapper" id="slidesWrapper">
+                    <!-- ※5枚の写真URLをご自由に変更してください -->
+                    <div class="slide"><img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800" alt="Gallery 1"></div>
+                    <div class="slide"><img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800" alt="Gallery 2"></div>
+                    <div class="slide"><img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800" alt="Gallery 3"></div>
+                    <div class="slide"><img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800" alt="Gallery 4"></div>
+                    <div class="slide"><img src="https://images.unsplash.com/photo-1520854221256-17451cc3599a?w=800" alt="Gallery 5"></div>
+                </div>
+            </div>
+            <!-- 下部ドットナビゲーション -->
+            <div class="slider-dots" id="sliderDots">
+                <span class="dot active" onclick="goToSlide(0)"></span>
+                <span class="dot" onclick="goToSlide(1)"></span>
+                <span class="dot" onclick="goToSlide(2)"></span>
+                <span class="dot" onclick="externalGoToSlide(3)"></span>
+                <span class="dot" onclick="goToSlide(4)"></span>
+            </div>
+        </section>
+
+        <!-- スケジュール & 会場情報 -->
+        <section class="schedule-section">
+            <h2 class="section-title">Schedule</h2>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <span class="time">11:15</span>
+                    <span class="event">受付開始</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="time">12:00</span>
+                    <span class="event">挙式（人前式）</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="time">13:00</span>
+                    <span class="event">披露宴パーティー</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="time">15:30</span>
+                    <span class="event">おひらき</span>
+                </div>
+            </div>
+
+            <h2 class="section-title" style="margin-top:20px;">Location</h2>
+            <div class="location-box">
+                <div class="location-title">グランドテラス アニバーサリー</div>
+                <div class="location-address">
+                    東京都港区芝公園4丁目2-8<br>
+                    TEL: 03-1234-5678<br><br>
+                    <span style="font-size:12px; color:var(--text-light);">※主要駅からシャトルバスが運行しております。</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 出欠フォーム（Googleフォーム連携） -->
+        <section class="rsvp-section">
+            <h2 class="section-title">RSVP</h2>
+            <div class="rsvp-card">
+                <p>誠に勝手ながら ご準備の都合上 以下の回答フォームより出欠をお知らせいただけますようお願い申し上げます。</p>
+                
+                <div class="parking-info">
+                    <strong>【駐車場のご案内】</strong><br>
+                    お車でお越しのお客さま向けの駐車スペースもございます。ご利用を希望される場合は、回答フォーム内の「駐車場の有無」にチェックをお願いいたします。
+                </div>
+
+                <!-- ※「YOUR_GOOGLE_FORM_URL」を実際のGoogleフォームの公開URLに置き換えてください -->
+                <a href="https://docs.google.com/forms/d/e/YOUR_GOOGLE_FORM_URL/viewform" class="rsvp-button" target="_blank">
+                    出欠を回答する
+                </a>
+                
+                <span class="deadline-text">ご回答期限: 2026年x月x日まで</span>
+            </div>
+        </section>
+
+        <footer>
+            © 2026 Issei & Miho Wedding. All Rights Reserved.
+        </footer>
+    </div>
+
+    <!-- --- JavaScript インタラクション制御 --- -->
+    <script>
+        // 1. 手紙の開封アニメーション処理
+        function openEnvelope() {
+            const wrapper = document.querySelector('.envelope-wrapper');
+            const overlay = document.getElementById('envelope-overlay');
+            
+            // 開封クラス付与
+            wrapper.classList.add('open');
+            
+            // アニメーション完了後にオーバーレイをフェードアウト
+            setTimeout(() => {
+                overlay.classList.add('fade-out');
+            }, 1600);
+        }
+
+        // 2. 自動切り替えスライドショー処理
+        let currentIdx = 0;
+        const totalSlides = 5;
+        const slidesWrapper = document.getElementById('slidesWrapper');
+        const dots = document.querySelectorAll('.slider-dots .dot');
+        let autoSlideInterval;
+
+        function updateSlider() {
+            // スライド位置の変更
+            slidesWrapper.style.transform = `translateX(-${currentIdx * 20}%)`;
+            
+            // ドットのactiveクラス切り替え
+            dots.forEach((dot, index) => {
+                if (index === currentIdx) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function nextSlide() {
+            currentIdx = (currentIdx + 1) % totalSlides;
+            updateSlider();
+        }
+
+        // 手動でドットを押したときの挙動
+        function goToSlide(index) {
+            currentIdx = index;
+            updateSlider();
+            resetAutoplay(); // 手動操作されたらタイマーをリセット
+        }
+
+        function resetAutoplay() {
+            clearInterval(autoSlideInterval);
+            autoSlideInterval = setInterval(nextSlide, 5000);
+        }
+
+        // 初期自動再生スタート（5秒ごと）
+        autoSlideInterval = setInterval(nextSlide, 5000);
+    </script>
+</body>
+</html>
